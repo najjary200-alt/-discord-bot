@@ -1,0 +1,99 @@
+import os
+import discord
+from discord.ext import commands
+
+intents = discord.Intents.default()
+intents.message_content = True
+intents.members = True
+
+bot = commands.Bot(command_prefix="!", intents=intents)
+
+@bot.event
+async def on_ready():
+    print(f"Logged in as {bot.user}")
+
+# --- الأوامر الأساسية ---
+@bot.command(name="تايم")
+async def time_command(ctx):
+    await ctx.send("أهلاً بك! تم استلام أمر الوقت بنجاح.")
+
+@bot.command(name="سامحت")
+async def forgive_command(ctx):
+    await ctx.send("عفا الله عن ما سلف! تم قبول السماح.")
+
+# --- أوامر الإدارة والأمان ---
+@bot.command(name="سجن")
+@commands.has_permissions(kick_members=True)
+async def jail_command(ctx, member: discord.Member, *, reason=None):
+    await member.kick(reason=reason)
+    await ctx.send(f"تم طرد العضو {member.mention} بنجاح.")
+
+# أمر التايم آوت (الأوامر العامة للعقوبات)
+@bot.command(name="ساكت")
+@commands.has_permissions(moderate_members=True)
+async def timeout_command(ctx, member: discord.Member, minutes: int, *, reason=None):
+    duration = discord.utils.utcnow() + discord.timedelta(minutes=minutes)
+    await member.timeout(duration, reason=reason)
+    await ctx.send(f"تم اعطاء تايم آوت لـ {member.mention} لمدة {minutes} دقيقة.")
+
+# --- نظام العملة ---
+@bot.command(name="Ho")
+async def currency_command(ctx):
+    await ctx.send(f"💰 {ctx.author.mention}, لقد تفاعلت في الروم وحصلت على عملتك الخاصة بنجاح!")
+
+# --- استمارة التقديم ---
+@bot.command(name="تقديم_إدارة")
+async def apply_command(ctx):
+    questions = (
+        "**استمارة التقديم للإدارة:**\n\n"
+        "1. اسمك الحقيقي:\n"
+        "2. عمرك الحقيقي:\n"
+        "3. ايش بلدك:\n"
+        "4. هل كنت إداري سابق عند احد:\n"
+        "5. إذا مسؤول الادارة قال لك سوي شي خطأ و ممنوع ايش تسوي:\n"
+        "6. خبراتك:\n"
+        "7. لو حد كان حاط صورة +18 ايش تصرفك:\n"
+        "8. اثنين تهاوشو واحد إداري و الثاني شخص عادي ايش تصرفك:\n"
+        "9. لو قال لك مبرمج برمج إنت أنا روحت ايش تصرفك:\n"
+        "10. لو مسؤول الادارة و مبرمج تهاوشو ايش تصرفك:\n\n"
+        "-# معك 10 ثواني للجواب على الاسئلة"
+    )
+    await ctx.send(questions)
+
+# --- نظام التكتات (Tickets) ---
+class TicketView(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=None)
+
+    @discord.ui.button(label="🎫 إنشاء تكت", style=discord.ButtonStyle.green, custom_id="create_ticket")
+    async def create_ticket(self, interaction: discord.Interaction, button: discord.ui.Button):
+        guild = interaction.guild
+        overwrites = {
+            guild.default_role: discord.PermissionOverwrite(view_channel=False),
+            interaction.user: discord.PermissionOverwrite(view_channel=True, send_messages=True),
+            guild.me: discord.PermissionOverwrite(view_channel=True, send_messages=True)
+        }
+        # إنشاء روم خاص للتكت
+        ticket_channel = await guild.create_text_channel(f"تكت-{interaction.user.name}", overwrites=overwrites)
+        await interaction.response.send_message(f"تم إنشاء التكت بنجاح: {ticket_channel.mention}", ephemeral=True)
+        await ticket_channel.send(f"مرحباً {interaction.user.mention}! استخدم الأوامر `!استلام` أو `!إغلاق` هنا.")
+
+@bot.command(name="قائمة_التكت")
+@commands.has_permissions(administrator=True)
+async def ticket_menu(ctx):
+    view = TicketView()
+    await ctx.send("اضغط على الزر أدناه لفتح تكت دعم جديد:", view=view)
+
+@bot.command(name="استلام")
+@commands.has_permissions(manage_channels=True)
+async def claim_ticket(ctx):
+    await ctx.send(f"🔒 تم استلام التكت بواسطة الإداري: {ctx.author.mention}")
+
+@bot.command(name="إغلاق")
+@commands.has_permissions(manage_channels=True)
+async def close_ticket(ctx):
+    await ctx.send("⏳ سيتم إغلاق التكت خلال ثوانٍ...")
+    await ctx.channel.delete()
+
+TOKEN = os.getenv("DISCORD_BOT_TOKEN")
+bot.run(TOKEN)

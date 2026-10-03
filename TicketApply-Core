@@ -235,7 +235,7 @@ class TicketSelect(discord.ui.Select):
     def __init__(self):
         options = [
             discord.SelectOption(label="Technical Support", description="للحصول على استفسار او طلب من الادارة", emoji="🛠️"),
-            discord.SelectOption(label="Kick Support", description="للحصول على استفسار من إدارة الكيك", emoji="⚔️️"),
+            discord.SelectOption(label="Kick Support", description="للحصول على استفسار من إدارة الكيك", emoji="⚔"),
             discord.SelectOption(label="High Administration", description="للحصول على استفسار او قبول تقديم من الادارة العليا", emoji="👑")
         ]
         super().__init__(placeholder="𝐒𝐞𝐥𝐞𝐜𝐭 𝐭𝐢𝐜𝐤𝐞𝐭 𝐭𝐲𝐩𝐞...", min_values=1, max_values=1, options=options, custom_id="ameiir_ticket_menu")
@@ -276,7 +276,7 @@ class TicketView(discord.ui.View):
 class ApplySelect(discord.ui.Select):
     def __init__(self):
         options = [
-            discord.SelectOption(label="Administration", description="Apply for Server Administration track", emoji="🛠️️"),
+            discord.SelectOption(label="Administration", description="Apply for Server Administration track", emoji="🛠"),
             discord.SelectOption(label="Event Management", description="Apply for Event Management track", emoji="🎉"),
             discord.SelectOption(label="Developer", description="Apply for Bot Developer track", emoji="💻"),
             discord.SelectOption(label="Moderator", description="Apply for Moderator track", emoji="⚔️")

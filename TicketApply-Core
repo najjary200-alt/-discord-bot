@@ -336,6 +336,21 @@ async def apply_menu(ctx):
     await target_channel.send(embed=embed, view=view)
     if target_channel != ctx.channel:
         await ctx.send(f"✅ تم إرسال قائمة التقديمات إلى روم: {target_channel.mention}")
+from aiohttp import web
+
+async def handle(request):
+    return web.Response(text="Ameiir-Nexus Bot is running!")
+
+app = web.Application()
+app.add_routes([web.get('/', handle)])
+
+async def web_server():
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, '0.0.0.0', 10000)
+    await site.start()
+
+# وعدّل دالة on_ready أو أضف تشغيل السيرفر مع البوت:
 
 TOKEN = os.getenv("DISCORD_BOT_TOKEN")
 bot.run(TOKEN)
